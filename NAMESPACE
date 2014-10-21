@@ -1,0 +1,6 @@
+import(MASS)
+import(nlme)
+export(lmenssp)
+export(filtered)
+export(smoothed)
+export(variogram)

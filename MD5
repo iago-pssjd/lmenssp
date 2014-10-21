@@ -1,0 +1,15 @@
+83917dd5bffea68687b06a0061d095bc *DESCRIPTION
+59faf25308989a7e3f9f1f7af52271ba *NAMESPACE
+bd1032910e9bb00ddc2cfb5d6d39f578 *R/filtered.R
+172c373949c0ef99e55b40e2e1a261e3 *R/lmenssp.R
+2f12c136ac427f88056e725c4ba31a30 *R/smoothed.R
+9ab88fef1a6fefef580305f51d21abf0 *R/variogram.R
+32401e769a26b3315d1220baa8b1e2df *data/data.sim.ibm.rda
+adef3d15f5aecd6ecc6b3cf22c51d9d3 *data/data.sim.ibm.short.rda
+347b8680c745b3dc1e1f60fc16e53d90 *man/data.sim.ibm.Rd
+b247982e4f83df728fe28e62daf24782 *man/data.sim.ibm.short.Rd
+7abc0d11fa7b73aafeee476946faacd3 *man/filtered.Rd
+b60c684cea2c03fe310b46e75e191478 *man/lmenssp-package.Rd
+d636b53970c3a6d270535ef857b25f81 *man/lmenssp.Rd
+64575b06eaf40f85fccdc889e2eaa0b1 *man/smoothed.Rd
+41c4f1a21066d8bc15b7c64956fd716a *man/variogram.Rd
