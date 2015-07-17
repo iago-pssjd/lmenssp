@@ -2,7 +2,8 @@
 \alias{data.sim.ibm}
 \docType{data}
 \title{
-A simulated data set under a mixed model with random intercept and integrated Brownian motion
+A simulated data set under a mixed model with random intercept, integrated Brownian motion and 
+multivariate normal response distribution 
 }
 \description{
 A longitudinal data set containing measurements on 500 subjects, each with their own sequence of follow-up time points
@@ -22,9 +23,12 @@ collected at irregularly spaced follow-up time points.
                            natural logarithm of estimated glomerular filtration rate}
   }
 }
+\details{
+For the details of the true parameter settings, see Diggle, Sousa and Asar (2015). 
+}
 \references{
-Diggle PJ, Sousa I, Asar O (2014) Real time monitoring of progression towards renal failure in primary care patients.
-Tentatively accepted by \emph{Biostatistics}.
+Diggle PJ, Sousa I, Asar O (2015) Real time monitoring of progression towards renal failure in primary care patients.
+\emph{Biostatistics}, 16(3), 522-536.
 }
 \examples{
 data(data.sim.ibm)

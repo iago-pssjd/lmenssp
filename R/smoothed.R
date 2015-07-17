@@ -8,13 +8,13 @@ cov.comb  <- cbind(id, as.matrix(model.matrix(attr(mf, "terms"), data = mf)))
 time.comb <- cbind(id, timeVar)   
 
 if(length(fine) == 0 & length(eq.forec) == 0 & length(uneq.forec) == 0){
-time.comb.sub <- time.comb[time.comb[, 1] %in% subj.id, ]
+time.comb.sub <- matrix(time.comb[time.comb[, 1] %in% subj.id, ], ncol = 2)
 timeSmooth.all <- tapply(time.comb.sub[, 2], time.comb.sub[, 1], function(x) x)
 } else if(length(fine) > 0 & length(eq.forec) == 0 & length(uneq.forec) == 0){
-time.comb.sub <- time.comb[time.comb[, 1] %in% subj.id, ]
+time.comb.sub <- matrix(time.comb[time.comb[, 1] %in% subj.id, ], ncol = 2)
 timeSmooth.all <- tapply(time.comb.sub[, 2], time.comb.sub[, 1], function(x) seq(min(x), round(max(x), (nchar(fine) - 2)), by = fine))
 } else if(length(fine) == 0 & length(eq.forec) > 0 & length(uneq.forec) == 0){
-time.comb.sub <- time.comb[time.comb[, 1] %in% subj.id, ]
+time.comb.sub <- matrix(time.comb[time.comb[, 1] %in% subj.id, ], ncol = 2)
 timeSmooth.all <- tapply(time.comb.sub[, 2], time.comb.sub[, 1], function(x) max(x) + cumsum(rep(eq.forec[1], eq.forec[2])))
 } else {
 subj.id        <- unique(uneq.forec[, 1])
@@ -238,6 +238,133 @@ output$w     <- w.save
 output$b     <- b.save
 
 }#iou
+
+########################################
+#####                             ###### 
+##### STATIONARY GAUSSIAN PROCESS ######
+#####   POWERED CORRELATION       ######
+########################################
+ 
+if(strsplit(process, "-")[[1]][1] == "sgp" & strsplit(process, "-")[[1]][2] == "powered"){
+
+pow <- as.numeric(strsplit(process, "-")[[1]][3])
+
+alpha.hat   <- matrix(estimate[1 : (ncol(cov.comb) - 1)])
+omegasq.hat <- estimate[ncol(cov.comb)]
+sigmasq.hat <- estimate[ncol(cov.comb) + 1]
+phi.hat     <- estimate[ncol(cov.comb) + 2]
+tausq.hat   <- estimate[ncol(cov.comb) + 3]
+
+u.save <- w.save <- NULL
+
+for (ii in subj.id){
+
+X    <- matrix(cov.comb[cov.comb[, 1] == ii, -1], ncol = ncol(cov.comb)-1)
+Y    <- as.matrix(resp.comb[resp.comb[, 1] == ii, -1])
+time <- time.comb[time.comb[, 1] == ii, -1]
+ni   <- nrow(X)
+
+timeSmooth <- unlist(timeSmooth.all[which((subj.id==ii) == TRUE)])
+
+## PREDICTION OF U
+
+Ki     <- matrix(1, 1, ni)
+Vi.inv <- solve(omegasq.hat * matrix(1, ni, ni) + 
+          sigmasq.hat * outer(c(time), c(time), function(x,y) exp(-abs(x - y)^pow/phi.hat)) + 
+          tausq.hat * diag(ni))
+u.mean <- omegasq.hat * Ki %*% Vi.inv %*% (Y - X %*% alpha.hat)
+u.var  <- omegasq.hat * (1 - omegasq.hat * Ki %*% Vi.inv %*% t(Ki))
+u.save <- rbind(u.save, c(ii, u.mean, u.var))
+
+## SMOOTHING W
+
+for(i in 1 : length(timeSmooth)){
+
+Fi     <- sigmasq.hat * outer(timeSmooth[i], time, function(x,y) exp(-abs(x - y)^pow/phi.hat))
+Vi.inv <- solve(omegasq.hat * matrix(1, ni, ni) + 
+                sigmasq.hat * outer(c(time), c(time), function(x,y) exp(-abs(x - y)^pow/phi.hat)) + 
+                tausq.hat * diag(ni))
+w.mean <- Fi %*% Vi.inv %*% (Y - X %*% alpha.hat)
+w.var  <- sigmasq.hat - Fi %*% Vi.inv %*% t(Fi)
+w.save <- rbind(w.save, c(ii, timeSmooth[i], w.mean, w.var))
+
+}#i
+}#ii
+
+colnames(u.save) <- c("id", "mean", "variance")
+colnames(w.save) <- c("id", "time", "mean", "variance")
+
+output       <- list()
+output$title <- "Smoothing for the mixed model with stationary Gaussian process - powered correlation function"
+output$date  <- date()
+output$u     <- u.save
+output$w     <- w.save
+output
+
+}#sgp-powered
+
+########################################
+#####                             ###### 
+##### STATIONARY GAUSSIAN PROCESS ######
+#####   MATERN CORRELATION        ######
+########################################
+ 
+if(strsplit(process, "-")[[1]][1] == "sgp" & strsplit(process, "-")[[1]][2] == "matern"){
+
+kappa <- as.numeric(strsplit(process, "-")[[1]][3])
+
+alpha.hat   <- matrix(estimate[1 : (ncol(cov.comb) - 1)])
+omegasq.hat <- estimate[ncol(cov.comb)]
+sigmasq.hat <- estimate[ncol(cov.comb) + 1]
+phi.hat     <- estimate[ncol(cov.comb) + 2]
+tausq.hat   <- estimate[ncol(cov.comb) + 3]
+
+u.save <- w.save <- NULL
+
+for (ii in subj.id){
+
+X    <- matrix(cov.comb[cov.comb[, 1] == ii, -1], ncol = ncol(cov.comb)-1)
+Y    <- as.matrix(resp.comb[resp.comb[, 1] == ii, -1])
+time <- time.comb[time.comb[, 1] == ii, -1]
+ni   <- nrow(X)
+
+timeSmooth <- unlist(timeSmooth.all[which((subj.id==ii) == TRUE)])
+
+## PREDICTION OF U
+
+Ki     <- matrix(1, 1, ni)
+Vi.inv <- solve(omegasq.hat * matrix(1, ni, ni) + 
+          sigmasq.hat * matern(u = outer(c(time), c(time), function(x,y) abs(x-y)), phi = phi.hat, kappa = kappa) + 
+          tausq.hat * diag(ni))
+u.mean <- omegasq.hat * Ki %*% Vi.inv %*% (Y - X %*% alpha.hat)
+u.var  <- omegasq.hat * (1 - omegasq.hat * Ki %*% Vi.inv %*% t(Ki))
+u.save <- rbind(u.save, c(ii, u.mean, u.var))
+
+## SMOOTHING W
+
+for(i in 1 : length(timeSmooth)){
+
+Fi     <- sigmasq.hat * matern(u = outer(timeSmooth[i], time, function(x,y) abs(x-y)), phi = phi.hat, kappa = kappa)
+Vi.inv <- solve(omegasq.hat * matrix(1, ni, ni) + 
+                sigmasq.hat * matern(u = outer(c(time), c(time), function(x,y) abs(x-y)), phi = phi.hat, kappa= kappa) + 
+                tausq.hat * diag(ni))
+w.mean <- Fi %*% Vi.inv %*% (Y - X %*% alpha.hat)
+w.var  <- sigmasq.hat - Fi %*% Vi.inv %*% t(Fi)
+w.save <- rbind(w.save, c(ii, timeSmooth[i], w.mean, w.var))
+
+}#i
+}#ii
+
+colnames(u.save) <- c("id", "mean", "variance")
+colnames(w.save) <- c("id", "time", "mean", "variance")
+
+output       <- list()
+output$title <- "Smoothing for the mixed model with stationary Gaussian process - Matern correlation function"
+output$date  <- date()
+output$u     <- u.save
+output$w     <- w.save
+
+}#sgp-matern
 
 output
 

@@ -211,6 +211,131 @@ output$b     <- b.save
 
 }#iou
 
+###########################################
+######                              #######
+###### STATIONARY GAUSSIAN PROCESS  #######
+######  POWERED CORRELATION         #######
+###########################################
+
+if(strsplit(process, "-")[[1]][1] == "sgp" & strsplit(process, "-")[[1]][2] == "powered"){
+
+pow <- as.numeric(strsplit(process, "-")[[1]][3])
+
+alpha.hat   <- matrix(estimate[1 : (ncol(cov.comb) -1)])
+omegasq.hat <- estimate[ncol(cov.comb)]
+sigmasq.hat <- estimate[ncol(cov.comb) + 1]
+phi.hat     <- estimate[ncol(cov.comb) + 2] 
+tausq.hat   <- estimate[ncol(cov.comb) + 3]
+
+u.save <- w.save <- NULL
+
+for (ii in subj.id){
+
+X    <- matrix(cov.comb[cov.comb[, 1] == ii, -1], ncol = ncol(cov.comb)-1)
+Y    <- as.matrix(resp.comb[resp.comb[, 1] == ii, -1])
+time <- as.matrix(time.comb[time.comb[, 1] == ii, -1])
+ni   <- nrow(X)
+
+## PREDICTION OF U
+
+Ki     <- matrix(1, 1, ni)
+Vi.inv <- solve(omegasq.hat * matrix(1, ni, ni) + 
+          sigmasq.hat * outer(c(time), c(time), function(x,y) exp(-abs(x - y)^pow/phi.hat)) + 
+          tausq.hat * diag(ni))
+u.mean <- omegasq.hat * Ki %*% Vi.inv %*% (Y - X %*% alpha.hat)
+u.var  <- omegasq.hat * (1 - omegasq.hat * Ki %*% Vi.inv %*% t(Ki))
+u.save <- rbind(u.save, c(ii, u.mean, u.var))
+
+
+## PREDICTION OF W
+
+for (i in 1:ni){
+
+Fik     <- sigmasq.hat * outer(time[1:i], time[i], function(x,y) exp(-abs(x - y)^pow/phi.hat))
+Vik.inv <- solve(omegasq.hat * matrix(1, i, i) + 
+           sigmasq.hat * outer(time[1:i], time[1:i], function(x,y) exp(-abs(x - y)^pow/phi.hat)) + 
+           tausq.hat * diag(i))
+w.mean  <- t(Fik) %*% Vik.inv %*% (matrix(Y[1:i,]) - X[1:i, ] %*% alpha.hat)
+w.var   <- sigmasq.hat - t(Fik) %*% Vik.inv %*% Fik
+w.save  <- rbind(w.save, c(ii, time[i], w.mean, w.var))
+
+}#i
+}#ii
+
+colnames(u.save) <- c("id", "mean", "variance")
+colnames(w.save) <- c("id", "time", "mean", "variance")
+
+output       <- list()
+output$title <- "Filtering for the mixed model with Brownian motion"
+output$date  <- date()
+output$u     <- u.save
+output$w     <- w.save
+output
+
+}#sgp-powered
+
+
+###########################################
+######                              #######
+###### STATIONARY GAUSSIAN PROCESS  #######
+######  MATERN CORRELATION          #######
+###########################################
+
+if(strsplit(process, "-")[[1]][1] == "sgp" & strsplit(process, "-")[[1]][2] == "matern"){
+
+kappa <- as.numeric(strsplit(process, "-")[[1]][3])
+
+alpha.hat   <- matrix(estimate[1 : (ncol(cov.comb) -1)])
+omegasq.hat <- estimate[ncol(cov.comb)]
+sigmasq.hat <- estimate[ncol(cov.comb) + 1]
+phi.hat     <- estimate[ncol(cov.comb) + 2] 
+tausq.hat   <- estimate[ncol(cov.comb) + 3]
+
+u.save <- w.save <- NULL
+
+for (ii in subj.id){
+
+X    <- matrix(cov.comb[cov.comb[, 1] == ii, -1], ncol = ncol(cov.comb)-1)
+Y    <- as.matrix(resp.comb[resp.comb[, 1] == ii, -1])
+time <- as.matrix(time.comb[time.comb[, 1] == ii, -1])
+ni   <- nrow(X)
+
+## PREDICTION OF U
+
+Ki     <- matrix(1, 1, ni)
+Vi.inv <- solve(omegasq.hat * matrix(1, ni, ni) + 
+          sigmasq.hat * matern(outer(c(time), c(time), function(x, y) abs(x - y)), phi.hat, kappa = kappa) + 
+          tausq.hat * diag(ni))
+u.mean <- omegasq.hat * Ki %*% Vi.inv %*% (Y - X %*% alpha.hat)
+u.var  <- omegasq.hat * (1 - omegasq.hat * Ki %*% Vi.inv %*% t(Ki))
+u.save <- rbind(u.save, c(ii, u.mean, u.var))
+
+## PREDICTION OF W
+
+for (i in 1:ni){
+
+Fik     <- sigmasq.hat * matern(outer(time[1:i], time[i], function(x,y) abs(x - y)), phi.hat, kappa = kappa)
+Vik.inv <- solve(omegasq.hat * matrix(1, i, i) + 
+           sigmasq.hat * matern(outer(time[1:i], time[1:i], function(x, y) abs(x - y)), phi.hat, kappa = kappa) + 
+           tausq.hat * diag(i))
+w.mean  <- t(Fik) %*% Vik.inv %*% (matrix(Y[1:i,]) - X[1:i, ] %*% alpha.hat)
+w.var   <- sigmasq.hat - t(Fik) %*% Vik.inv %*% Fik
+w.save  <- rbind(w.save, c(ii, time[i], w.mean, w.var))
+
+}#i
+}#ii
+
+colnames(u.save) <- c("id", "mean", "variance")
+colnames(w.save) <- c("id", "time", "mean", "variance")
+
+output       <- list()
+output$title <- "Filtering for the mixed model with stationary Gaussian process - Matern correlation function"
+output$date  <- date()
+output$u     <- u.save
+output$w     <- w.save
+
+}#sgp-matern
+
 output
 
 }

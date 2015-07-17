@@ -2,14 +2,15 @@
 \alias{smoothed}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-A function for smoothing
+A function for smoothing under multivariate normal response distribution
 }
 \description{
-Smooths random components of the mixed effects model with non-stationary stochastic process component
+Smooths random components of the mixed model with a stationary or non-stationary stochastic process 
+component, under multivariate normal response distribution
 }
 \usage{
-smoothed(formula, data = NULL, id, process = "bm", timeVar, estimate, subj.id = NULL, 
-         fine = NULL, eq.forec = NULL, uneq.forec = NULL)
+smoothed(formula, data = NULL, id, process = "bm", timeVar, estimate, 
+subj.id = NULL, fine = NULL, eq.forec = NULL, uneq.forec = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,8 +25,10 @@ a vector for subject identification
 }
   \item{process}{
 a character string, \code{"bm"} for Brownian motion, \code{"ibm"} for 
-integrated Brownian motion, and \code{"iou"} for integrated 
-Ornstein-Uhlenbeck process
+integrated Brownian motion, \code{"iou"} for integrated 
+Ornstein-Uhlenbeck process, \code{"sgp-powered-power-method"} for 
+stationary process with powered correlation function, and 
+\code{"sgp-matern-kappa"} for stationary process with Matern correlation function
 }
   \item{timeVar}{
 a vector for the time variable
@@ -46,19 +49,25 @@ a two element vector for equally spaced forecasting
 a two-column data frame or matrix for forecasting at desired time points
 }
 }
-%\details{
-%%  ~~ If necessary, more details than the description above ~~
-%}
+\details{
+For details of \code{"process"} see \code{lmenssp}.
+}
 \value{
-A list of output for mean and variance of the smoothing 
-distribution is returned
+Returns the results as lists for the random intercept and 
+stochastic process 
 }
 \references{
-Diggle PJ, Sousa I, Asar O (2014) Real time monitoring of progression towards renal failure in primary care patients.
-Tentatively accepted by \emph{Biostatistics}.
+Asar O, Ritchie J, Kalra P, Diggle PJ (2015) Acute kidney injury amongst chronic kidney disease 
+patients: a case-study in statistical modelling. To be submitted.
+
+Diggle PJ (1988) An approach to the analysis of repeated measurements. \emph{Biometrics}, \bold{44}, 959-971.
+
+
+Diggle PJ, Sousa I, Asar O (2015) Real time monitoring of progression towards renal failure in primary care patients.
+\emph{Biostatistics}, 16(3), 522-536. 
 }
 \author{
-Ozgur Asar
+Ozgur Asar, Peter J. Diggle
 }
 %\note{
 %%  ~~further notes~~
@@ -70,9 +79,10 @@ Ozgur Asar
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 %}
 \examples{
-# loading the package and the data set
-library(lmenssp)
-data(data.sim.ibm.short)
+# loading the data set and subsetting it for the first 20 patients 
+# for the sake illustration of the usage of the functions
+data(data.sim.ibm)
+data.sim.ibm.short <- data.sim.ibm[data.sim.ibm$id <= 20, ]
 
 # model formula to be used below
 formula <- log.egfr ~ sex + bage + fu + pwl
@@ -145,4 +155,4 @@ uneq.forecast.501
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{smoothing}
-%\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{multivariate normal distribution}% __ONLY ONE__ keyword per line

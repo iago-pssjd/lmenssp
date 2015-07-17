@@ -2,10 +2,11 @@
 \alias{filtered}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-A function for filtering
+A function for filtering under multivariate normal response distribution
 }
 \description{
-Filters random components of the mixed model with a non-stationary stochastic process component
+Filters random components of the mixed model with a stationary or non-stationary stochastic process 
+component, under multivariate normal response distribution
 }
 \usage{
 filtered(formula, data = NULL, id, process = "bm", timeVar, estimate, subj.id)
@@ -13,7 +14,7 @@ filtered(formula, data = NULL, id, process = "bm", timeVar, estimate, subj.id)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{formula}{
-a typical R formula for the fixed effects component of the model
+a typical \code{R} formula for the fixed effects component of the model
 }
   \item{data}{
 a data frame from which the variables are to be extracted
@@ -23,8 +24,11 @@ a vector for subject identification
 }
   \item{process}{
 a character string, \code{"bm"} for Brownian motion, \code{"ibm"} for 
-integrated Brownian motion, and \code{"iou"} for integrated 
-Ornstein-Uhlenbeck process
+integrated Brownian motion, \code{"iou"} for integrated 
+Ornstein-Uhlenbeck process, 
+\code{"sgp-powered-power-method"} for stationary process with powered 
+correlation function, and \code{"sgp-matern-kappa"} for stationary process 
+with Matern correlation function
 }
   \item{timeVar}{
 a vector for the time variable at which filtered values are required
@@ -36,18 +40,19 @@ a vector for the maximum likelihood estimates
 a vector for IDs of the subjects for whom filtering will be carried out
 }
 }
-%\details{
-%%  ~~ If necessary, more details than the description above ~~
-%}
+\details{
+For the details of \code{process}, see \code{lmenssp}.
+}
 \value{
-Returns the results as lists
+Returns the results as lists for the random intercept and 
+stochastic process
 }
 \references{
-Diggle PJ, Sousa I, Asar O (2014) Real time monitoring of progression towards renal failure in primary care patients.
-Tentatively accepted by \emph{Biostatistics}.
+Diggle PJ, Sousa I, Asar O (2015) Real time monitoring of progression towards renal failure in primary care patients.
+\emph{Biostatistics}, 16(3), 522-536. 
 }
 \author{
-Ozgur Asar
+Ozgur Asar, Peter J. Diggle
 }
 %\note{
 %%  ~~further notes~~
@@ -59,10 +64,10 @@ Ozgur Asar
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 %}
 \examples{
-
-# loading the package and the data set
-library(lmenssp)
-data(data.sim.ibm.short)
+# loading the data set and subsetting it for the first 20 patients 
+# for the sake illustration of the usage of the functions
+data(data.sim.ibm)
+data.sim.ibm.short <- data.sim.ibm[data.sim.ibm$id <= 20, ]
 
 # model formula to be used below
 formula <- log.egfr ~ sex + bage + fu + pwl
@@ -70,7 +75,8 @@ formula <- log.egfr ~ sex + bage + fu + pwl
 # obtaining the maximum likelihood estimates of the model
 # parameters for the model with integrated Brownian motion
 fit.ibm <- lmenssp(formula = formula, data = data.sim.ibm.short,
-  id = data.sim.ibm.short$id, process = "ibm", timeVar = data.sim.ibm.short$fu, silent = FALSE)
+  id = data.sim.ibm.short$id, process = "ibm", timeVar = data.sim.ibm.short$fu, 
+  silent = FALSE)
 fit.ibm
 
 # filtering for subjects with ID=1 and 2
@@ -89,7 +95,7 @@ fil.501 <- filtered(formula = formula, data = data.501,
    id = data.501$id, process = "ibm", timeVar = data.501$fu,  
    estimate = fit.ibm$estimate[, 1], subj.id = 501)
 fil.501
-
+ 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
