@@ -115,6 +115,7 @@ if(strsplit(process, "-")[[1]][1] == "sgp" & strsplit(process, "-")[[1]][2] == "
 output$date  <- date()
 output$u     <- u.save
 output$w     <- w.save
+output$g     <- eps.hat
 
 output
 

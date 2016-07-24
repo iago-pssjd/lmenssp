@@ -18,8 +18,8 @@ miscellaneous functions for diagnostic checks, boostrap standard error calculati
 \tabular{ll}{
 Package: \tab lmenssp\cr
 Type: \tab Package\cr
-Version: \tab 1.1\cr
-Date: \tab 2015-07-17\cr
+Version: \tab 1.2\cr
+Date: \tab 2016-07-23\cr
 License: \tab GPL (>=2) \cr
 }
 }
