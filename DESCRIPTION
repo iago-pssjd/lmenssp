@@ -1,15 +1,17 @@
 Package: lmenssp
-Type: Package
+Version: 1.3
+Date: 2024-08-17
 Title: Linear Mixed Effects Models with Non-Stationary Stochastic
         Processes
-Version: 1.2
-Date: 2016-07-23
-Author: Ozgur Asar, Peter J. Diggle
-Maintainer: Ozgur Asar <ozgur.asar@acibadem.edu.tr>
-Depends: MASS, nlme, mvtnorm, geoR,
 Description: Contains functions to estimate model parameters and filter, smooth and forecast random effects coefficients for mixed models with stationary and non-stationary stochastic processes under multivariate normal and t response distributions, diagnostic checks, bootstrap standard error calculation, etc.
+Authors@R: c(
+    person("Iago", "Giné-Vázquez", email = "iago.gin-vaz@protonmail.com", role = c("cre")),
+    person("Ozgur", "Asar", email = "ozgurasarstat@gmail.com", role = c("aut")),
+    person("Peter J.", "Diggle", email = "p.diggle@lancaster.ac.uk", role = c("aut"))
+  )
+Depends: MASS, nlme, mvtnorm, geoR,
 License: GPL (>= 2)
+URL: https://gitlab.com/iagogv/lmenssp
+BugReports: https://gitlab.com/iagogv/lmenssp/-/issues
 NeedsCompilation: no
-Packaged: 2016-07-23 10:36:10 UTC; user
-Repository: CRAN
-Date/Publication: 2016-07-24 00:16:30
+Encoding: UTF-8
